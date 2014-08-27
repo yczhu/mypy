@@ -153,6 +153,7 @@ class SemanticAnalyzer(NodeVisitor):
 
         if self.cur_mod_id == 'builtins':
             remove_imported_names_from_symtable(self.globals, 'builtins')
+            remove_internal_names_from_symtable(self.globals)
 
     def visit_func_def(self, defn: FuncDef) -> None:
         self.errors.push_function(defn.name())
@@ -1762,6 +1763,15 @@ def remove_imported_names_from_symtable(names: SymbolTable,
         fullname = node.node.fullname()
         prefix = fullname[:fullname.rfind('.')]
         if prefix != module:
+            removed.append(name)
+    for name in removed:
+        del names[name]
+
+
+def remove_internal_names_from_symtable(names: SymbolTable) -> None:
+    removed = List[str]()
+    for name, node in names.items():
+        if name[0] == '_' and name[1] != '_':
             removed.append(name)
     for name in removed:
         del names[name]
